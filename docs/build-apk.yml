@@ -1,0 +1,34 @@
+# GitHub Actions 打包 APK 範本：複製到 .github/workflows/build-apk.yml 後，到 Actions 分頁手動按「Run workflow」
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npx expo prebuild --platform android --no-install
+        env:
+          CI: 1
+      - name: Gradle assembleRelease（使用 debug 金鑰簽章）
+        working-directory: android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a --no-daemon
+      - run: cp android/app/build/outputs/apk/release/app-release.apk kids-reminder.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kids-reminder-apk
+          path: kids-reminder.apk
