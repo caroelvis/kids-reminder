@@ -26,7 +26,7 @@ jobs:
           CI: 1
       - name: Gradle assembleRelease（使用 debug 金鑰簽章）
         working-directory: android
-        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a --no-daemon
+        run: ./gradlew assembleRelease --no-daemon
       - run: cp android/app/build/outputs/apk/release/app-release.apk kids-reminder.apk
       - uses: actions/upload-artifact@v4
         with:
