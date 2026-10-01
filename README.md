@@ -23,7 +23,7 @@
 
 1. 用手機打開這個網址下載 APK：
    **https://github.com/caroelvis/kids-reminder/releases/latest/download/kids-reminder.apk**
-   （或到本專案的 [Releases](https://github.com/caroelvis/kids-reminder/releases) 頁面，點 `kids-reminder.apk`）
+   （或到本專案的 [Releases](https://github.com/caroelvis/kids-reminder/releases) 頁面，點 `kids-reminder.apk`，約 12 MB）
 2. 下載完成後點開檔案。第一次會出現「為了安全，手機不允許安裝不明來源的應用程式」：
    點「**設定**」→ 打開「**允許這個來源**」（Chrome 或「檔案」App）→ 返回 → 點「**安裝**」。
    - 如果出現 Google Play 安全防護（Play Protect）的警告，點「**仍要安裝**」即可（因為這個 App 不是從 Play 商店下載的）。
@@ -56,6 +56,7 @@
 - 重新開機後通知會自動恢復；如果覺得怪怪的，打開 App 一次就會重新排程。
 - 語音用的是手機內建的「文字轉語音」，聲音好不好聽要看手機；沒有中文語音資料時可能念不出來。
 - 國定假日不會自動跳過（只看星期幾），放假時可以把提醒關掉。
+- 從 v1.0.1 起 APK 只支援 64 位元 ARM 手機（arm64-v8a，近幾年的 Android 手機都是），檔案約 12 MB。
 - 這個 APK 用除錯（debug）金鑰簽章，只適合自己家裡安裝，不能上架 Play 商店。
 - 目前只做 Android；iOS 需要 Apple 開發者帳號才能安裝。
 
