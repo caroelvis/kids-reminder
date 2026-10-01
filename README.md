@@ -44,12 +44,12 @@
 1. **🎙️ 爸媽錄的聲音**：有錄音就播錄音。
 2. **🎀 嘟嘟的聲音**：提醒文字跟下面的句子「一字不差」時，播放內建語音檔（`assets/voice/`）：
    「記得帶餐袋喔！」「記得把聯絡簿和功課拿出來喔！」「記得帶水壺喔！」「今天要穿體育服喔！」「嗨！我是嘟嘟！」
-   這些是用微軟 Edge 神經語音 **zh-TW-HsiaoYuNeural（曉雨）**，音調 **+30Hz**、語速 **+10%** 事先產生的 mp3（單聲道、每個約 10–20 KB）。
+   這些是用微軟 Edge 神經語音 **zh-TW-HsiaoChenNeural（曉臻）**，音調 **+35Hz**、語速 **+10%** 事先產生的 mp3（單聲道、每個約 8–15 KB，並去掉前後的靜音）。
 3. **📱 手機語音**：其他自己打的文字，用手機內建的文字轉語音（音調調高到 1.5 倍，比較可愛）。
    App 一打開就會先讓語音引擎「暖機」，並優先選用裝在手機裡、不用網路的中文語音，減少延遲。
 
 想替新句子加內建語音：用 [edge-tts](https://github.com/rany2/edge-tts) 產生 mp3
-（`edge-tts --voice zh-TW-HsiaoYuNeural --pitch=+30Hz --rate=+10% --text "記得帶外套喔！" --write-media assets/voice/coat.mp3`），
+（`edge-tts --voice zh-TW-HsiaoChenNeural --pitch=+35Hz --rate=+10% --text "記得帶外套喔！" --write-media assets/voice/coat.mp3`），
 再到 `src/voice.ts` 的 `BUNDLED_CLIPS` 加一行，重新打包。
 
 ### 錄自己的聲音

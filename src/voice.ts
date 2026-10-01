@@ -3,7 +3,7 @@
 import { AudioSource, preload, setAudioModeAsync } from 'expo-audio';
 
 // 文字 → 內建語音檔。文字要「完全一樣」才會用內建語音。
-// 這些語音是用微軟 Edge 的 zh-TW-HsiaoYuNeural 聲音（音調 +30Hz、語速 +10%）事先產生的。
+// 這些語音是用微軟 Edge 的 zh-TW-HsiaoChenNeural 聲音（音調 +35Hz、語速 +10%，去掉前後靜音）事先產生的。
 export const BUNDLED_CLIPS: Record<string, number> = {
   '記得帶餐袋喔！': require('../assets/voice/breakfast.mp3'),
   '記得把聯絡簿和功課拿出來喔！': require('../assets/voice/home.mp3'),
