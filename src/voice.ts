@@ -5,6 +5,8 @@ import { AudioSource, preload, setAudioModeAsync } from 'expo-audio';
 // 文字 → 內建語音檔。文字要「完全一樣」才會用內建語音。
 // 這些語音是用微軟 Edge 的 zh-TW-HsiaoChenNeural 聲音（音調 +35Hz、語速 +10%，去掉前後靜音）事先產生的。
 export const BUNDLED_CLIPS: Record<string, number> = {
+  // 開頭是「叮叮叮叮」的小鈴聲（代替念出「登登登登」），接著念名字和提醒
+  '登登登登～Rita、Silvia 小朋友，上學前記得拿餐袋喔！': require('../assets/voice/morning.mp3'),
   '記得帶餐袋喔！': require('../assets/voice/breakfast.mp3'),
   '記得把聯絡簿和功課拿出來喔！': require('../assets/voice/home.mp3'),
   '記得帶水壺喔！': require('../assets/voice/water.mp3'),

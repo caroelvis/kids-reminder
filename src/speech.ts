@@ -19,7 +19,10 @@ export async function warmUpSpeech() {
   } catch {}
 }
 
-export function speak(text: string, onStart?: () => void, onDone?: () => void) {
+/**
+ * 念出文字。onDone：正常念完；onStopped：被中斷（例如按了「我知道了！」）。
+ */
+export function speak(text: string, onStart?: () => void, onDone?: () => void, onStopped?: () => void) {
   Speech.stop();
   Speech.speak(text, {
     language: 'zh-TW',
@@ -28,7 +31,7 @@ export function speak(text: string, onStart?: () => void, onDone?: () => void) {
     pitch: 1.5,
     onStart,
     onDone,
-    onStopped: onDone,
+    onStopped: onStopped ?? onDone,
     onError: () => onDone?.(),
   });
 }
