@@ -15,6 +15,8 @@
 - 每個提醒都可以修改：**要說的話、時間、星期幾、開／關**。
 - 可以**新增**（例如「記得帶水壺喔！」「今天要穿體育服喔！」）或**刪除**提醒。
 - 按「🔊 試聽」可以馬上聽聽看、看嘟嘟說話。
+- **可愛的小女生聲音**：常用句子已內建事先錄好的語音（不用網路、按下去馬上出聲）。
+- **爸媽也可以錄自己的聲音**：在「✏️ 修改」裡按「🎙️ 錄自己的聲音」，提醒時就會播你的錄音。
 - 點通知打開 App，或 App 開著時通知到了，會出現**全螢幕嘟嘟畫面**、大字對話框，並把提醒念出來；按「**我知道了！**」關閉。
 - 完全離線：資料只存在手機裡，不需要網路、不需要帳號。
 - 按鈕大大的、字大大的，小朋友也會用。
@@ -23,7 +25,7 @@
 
 1. 用手機打開這個網址下載 APK：
    **https://github.com/caroelvis/kids-reminder/releases/latest/download/kids-reminder.apk**
-   （或到本專案的 [Releases](https://github.com/caroelvis/kids-reminder/releases) 頁面，點 `kids-reminder.apk`，約 12 MB）
+   （或到本專案的 [Releases](https://github.com/caroelvis/kids-reminder/releases) 頁面，點 `kids-reminder.apk`，約 14 MB）
 2. 下載完成後點開檔案。第一次會出現「為了安全，手機不允許安裝不明來源的應用程式」：
    點「**設定**」→ 打開「**允許這個來源**」（Chrome 或「檔案」App）→ 返回 → 點「**安裝**」。
    - 如果出現 Google Play 安全防護（Play Protect）的警告，點「**仍要安裝**」即可（因為這個 App 不是從 Play 商店下載的）。
@@ -34,6 +36,25 @@
    - **⏱️ 10 秒後測試通知**：按下後回到桌面，10 秒後應該會跳出通知。點通知就會看到嘟嘟說話。
 5. 確認手機的**媒體音量**有打開（念提醒用的是媒體音量），而且手機有中文語音：
    設定 →「系統」→「語言與輸入」→「文字轉語音輸出」→ 選「Google 語音服務」，並安裝「中文（台灣）」語音資料。
+
+## 🎀 嘟嘟的聲音是怎麼來的？
+
+每個提醒會依照下面順序決定用哪個聲音（卡片上也會標示）：
+
+1. **🎙️ 爸媽錄的聲音**：有錄音就播錄音。
+2. **🎀 嘟嘟的聲音**：提醒文字跟下面的句子「一字不差」時，播放內建語音檔（`assets/voice/`）：
+   「記得帶餐袋喔！」「記得把聯絡簿和功課拿出來喔！」「記得帶水壺喔！」「今天要穿體育服喔！」「嗨！我是嘟嘟！」
+   這些是用微軟 Edge 神經語音 **zh-TW-HsiaoYuNeural（曉雨）**，音調 **+30Hz**、語速 **+10%** 事先產生的 mp3（單聲道、每個約 10–20 KB）。
+3. **📱 手機語音**：其他自己打的文字，用手機內建的文字轉語音（音調調高到 1.5 倍，比較可愛）。
+   App 一打開就會先讓語音引擎「暖機」，並優先選用裝在手機裡、不用網路的中文語音，減少延遲。
+
+想替新句子加內建語音：用 [edge-tts](https://github.com/rany2/edge-tts) 產生 mp3
+（`edge-tts --voice zh-TW-HsiaoYuNeural --pitch=+30Hz --rate=+10% --text "記得帶外套喔！" --write-media assets/voice/coat.mp3`），
+再到 `src/voice.ts` 的 `BUNDLED_CLIPS` 加一行，重新打包。
+
+### 錄自己的聲音
+在提醒卡片按「✏️ 修改」→「🎙️ 錄自己的聲音」→ 第一次會問麥克風權限，按「允許」→ 說完按「⏹️ 停止錄音」→
+可按「▶️ 聽錄音」確認 → 按「💾 儲存」。不想用了按「🗑️ 不用錄音」再儲存。錄音只存在這支手機裡。
 
 ## ✏️ 怎麼修改提醒
 
@@ -54,9 +75,10 @@
   - App 開著（在畫面上）時：通知一到，嘟嘟會直接出現並念出來。
 - 有些手機（小米、OPPO、vivo、華為、三星等）的**省電功能**可能讓通知延後或不出現，請一定要「關閉電池最佳化」，必要時在「自動啟動／背景執行」裡允許這個 App。
 - 重新開機後通知會自動恢復；如果覺得怪怪的，打開 App 一次就會重新排程。
-- 語音用的是手機內建的「文字轉語音」，聲音好不好聽要看手機；沒有中文語音資料時可能念不出來。
+- 內建語音只適用於上面列出的句子；自己打的文字會用手機內建的「文字轉語音」，聲音好不好聽要看手機，沒有中文語音資料時可能念不出來（可以改用「錄自己的聲音」）。
+- 通知響起時（App 沒開著）是一般通知鈴聲，點開通知後才會播放嘟嘟的聲音。
 - 國定假日不會自動跳過（只看星期幾），放假時可以把提醒關掉。
-- 從 v1.0.1 起 APK 只支援 64 位元 ARM 手機（arm64-v8a，近幾年的 Android 手機都是），檔案約 12 MB。
+- 從 v1.0.1 起 APK 只支援 64 位元 ARM 手機（arm64-v8a，近幾年的 Android 手機都是），檔案約 14 MB。
 - 這個 APK 用除錯（debug）金鑰簽章，只適合自己家裡安裝，不能上架 Play 商店。
 - 目前只做 Android；iOS 需要 Apple 開發者帳號才能安裝。
 
@@ -67,12 +89,13 @@
 | `App.tsx` | 主畫面：提醒清單、試聽／修改按鈕、新增提醒、編輯視窗、給爸媽的設定按鈕。 |
 | `src/storage.ts` | 定義「一個提醒」長什麼樣子，**預設的兩個提醒寫在這裡**，以及把資料存進手機（AsyncStorage）。 |
 | `src/notifications.ts` | 建立 Android 通知頻道（高重要性＋鈴聲）、要求通知權限、把每個提醒依星期幾排成「每週重複」的通知。 |
-| `src/speech.ts` | 用 `expo-speech` 以中文（zh-TW）把文字念出來。 |
+| `src/voice.ts` | 內建語音檔清單（文字 → mp3），App 啟動時預先載入，讓播放幾乎沒有延遲。 |
+| `src/speech.ts` | 沒有語音檔時，用 `expo-speech` 以中文（zh-TW）念出來；啟動時先暖機。 |
 | `src/Mascot.tsx` | 原創吉祥物「嘟嘟」：用 `react-native-svg` 畫的小黃雞，用 React Native `Animated` 做跳跳、揮手、眨眼、說話嘴巴動。 |
-| `src/ReminderOverlay.tsx` | 全螢幕提醒畫面：嘟嘟＋對話框大字＋「我知道了！」按鈕。 |
+| `src/ReminderOverlay.tsx` | 全螢幕提醒畫面：嘟嘟＋對話框大字＋「我知道了！」按鈕；播放語音檔（`expo-audio`），嘴巴跟著聲音動。 |
 | `app.json` | App 的名稱「上學小提醒」、套件名稱 `com.caroelvis.kidsreminder`、圖示、權限設定。 |
 | `index.ts` | 程式進入點，啟動 `App`。 |
-| `assets/` | App 圖示（嘟嘟）、通知小圖示、啟動畫面圖片。 |
+| `assets/` | App 圖示（嘟嘟）、通知小圖示、啟動畫面圖片；`assets/voice/` 是內建語音檔。 |
 | `package.json` | 用到的套件清單（Expo、expo-notifications、expo-speech…）。 |
 | `docs/build-apk.yml` | GitHub Actions 自動打包 APK 的設定範本（要用時複製到 `.github/workflows/`）。 |
 
@@ -104,6 +127,6 @@ cd android
 ## 技術
 
 Expo SDK 57 · React Native · TypeScript · expo-notifications · expo-speech ·
-@react-native-async-storage/async-storage · @react-native-community/datetimepicker · react-native-svg · expo-intent-launcher
+@react-native-async-storage/async-storage · @react-native-community/datetimepicker · react-native-svg · expo-intent-launcher · expo-audio · expo-file-system
 
 嘟嘟是本專案原創角色，歡迎自由使用。

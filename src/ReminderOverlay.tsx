@@ -1,45 +1,66 @@
 // 全螢幕提醒畫面：嘟嘟 + 對話框 + 「我知道了！」按鈕
+// 有語音檔（內建或家長錄音）就播語音檔；沒有才用文字轉語音。
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import Mascot from './Mascot';
 import { speak, stopSpeaking } from './speech';
+import { clipFor } from './voice';
 
 type Props = {
   visible: boolean;
   title: string;
   message: string;
+  voiceUri?: string;
   onClose: () => void;
 };
 
-export default function ReminderOverlay({ visible, title, message, onClose }: Props) {
-  const [speaking, setSpeaking] = useState(false);
+export default function ReminderOverlay({ visible, title, message, voiceUri, onClose }: Props) {
+  const [ttsSpeaking, setTtsSpeaking] = useState(false);
   const pop = useRef(new Animated.Value(0)).current;
+  const player = useAudioPlayer(null, { updateInterval: 100 });
+  const status = useAudioPlayerStatus(player);
+
+  const play = () => {
+    const src = clipFor(message, voiceUri);
+    stopSpeaking();
+    if (src) {
+      setTtsSpeaking(false);
+      try {
+        player.replace(src);
+        player.seekTo(0).catch(() => {});
+        player.play();
+        return;
+      } catch {
+        // 播放失敗就改用文字轉語音
+      }
+    }
+    setTtsSpeaking(true);
+    speak(message, () => setTtsSpeaking(true), () => setTtsSpeaking(false));
+  };
 
   useEffect(() => {
     if (!visible) return;
+    play(); // 一出現就馬上開口，不等動畫
     pop.setValue(0);
     Animated.spring(pop, { toValue: 1, friction: 5, useNativeDriver: true }).start();
-    setSpeaking(true);
-    speak(
-      message,
-      () => setSpeaking(true),
-      () => setSpeaking(false)
-    );
     // 保險：最久 12 秒後嘴巴停下來
-    const t = setTimeout(() => setSpeaking(false), 12000);
+    const t = setTimeout(() => setTtsSpeaking(false), 12000);
     return () => clearTimeout(t);
-  }, [visible, message, pop]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, message, voiceUri]);
 
   const close = () => {
     stopSpeaking();
-    setSpeaking(false);
+    try {
+      player.pause();
+    } catch {}
+    setTtsSpeaking(false);
     onClose();
   };
 
-  const again = () => {
-    setSpeaking(true);
-    speak(message, () => setSpeaking(true), () => setSpeaking(false));
-  };
+  // 嘴巴跟著聲音動：語音檔正在播放，或文字轉語音正在念
+  const speaking = (status.playing && !status.didJustFinish) || ttsSpeaking;
 
   return (
     <Modal visible={visible} animationType="fade" statusBarTranslucent onRequestClose={close}>
@@ -49,13 +70,13 @@ export default function ReminderOverlay({ visible, title, message, onClose }: Pr
           <Text style={styles.message}>{message}</Text>
           <View style={styles.tail} />
         </Animated.View>
-        <Pressable onPress={again} accessibilityLabel="再聽一次">
+        <Pressable onPress={play} accessibilityLabel="再聽一次">
           <Mascot speaking={speaking} size={230} />
         </Pressable>
         <Pressable style={({ pressed }) => [styles.ok, pressed && { transform: [{ scale: 0.96 }] }]} onPress={close}>
           <Text style={styles.okText}>我知道了！</Text>
         </Pressable>
-        <Pressable onPress={again} style={styles.againBtn}>
+        <Pressable onPress={play} style={styles.againBtn}>
           <Text style={styles.againText}>🔊 再聽一次</Text>
         </Pressable>
       </View>

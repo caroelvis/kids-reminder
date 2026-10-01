@@ -2,7 +2,7 @@
   "expo": {
     "name": "上學小提醒",
     "slug": "kids-reminder",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.caroelvis.kidsreminder",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#FFE9A8",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -24,7 +24,8 @@
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -62,7 +63,17 @@
             "useLegacyPackaging": true
           }
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "錄下爸爸媽媽的聲音，用來提醒孩子。",
+          "recordAudioAndroid": true,
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      "expo-asset"
     ]
   }
 }

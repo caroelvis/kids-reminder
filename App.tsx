@@ -28,10 +28,24 @@ import {
 } from './src/storage';
 import { ensurePermission, rescheduleAll, setupChannel } from './src/notifications';
 import ReminderOverlay from './src/ReminderOverlay';
+import { BUNDLED_CLIPS, initAudio } from './src/voice';
+import { warmUpSpeech } from './src/speech';
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio';
+import { File, Paths } from 'expo-file-system';
+
+// App 一啟動就先準備聲音，提醒出現時才不會慢
+initAudio();
 
 const PACKAGE = 'com.caroelvis.kidsreminder';
 
-type Showing = { title: string; message: string } | null;
+type Showing = { title: string; message: string; voiceUri?: string } | null;
 
 export default function App() {
   const [list, setList] = useState<Reminder[] | null>(null);
@@ -39,20 +53,25 @@ export default function App() {
   const [showing, setShowing] = useState<Showing>(null);
   const [editing, setEditing] = useState<Reminder | null>(null);
   const handledIds = useRef(new Set<string>());
+  const listRef = useRef<Reminder[] | null>(null);
+  listRef.current = list;
 
   const showFromNotification = useCallback((n: Notifications.Notification) => {
     const id = n.request.identifier + ':' + n.date;
     if (handledIds.current.has(id)) return;
     handledIds.current.add(id);
     const data = (n.request.content.data || {}) as any;
+    const r = listRef.current?.find((x) => x.id === data.reminderId);
     setShowing({
-      title: data.title || n.request.content.title || '提醒',
-      message: data.message || n.request.content.body || '',
+      title: r?.title || data.title || n.request.content.title || '提醒',
+      message: r?.message || data.message || n.request.content.body || '',
+      voiceUri: r?.voiceUri,
     });
   }, []);
 
   // 第一次開啟：載入資料、建立通知頻道、要求權限、排程
   useEffect(() => {
+    warmUpSpeech();
     (async () => {
       await setupChannel();
       const ok = await ensurePermission();
@@ -164,6 +183,9 @@ export default function App() {
             </View>
             <Text style={styles.cardTitle}>{r.title}</Text>
             <Text style={styles.cardMsg}>{r.message}</Text>
+            <Text style={styles.voiceTag}>
+              {r.voiceUri ? '🎙️ 爸媽錄的聲音' : BUNDLED_CLIPS[r.message.trim()] ? '🎀 嘟嘟的聲音' : '📱 手機語音'}
+            </Text>
             <Text style={styles.days}>
               {r.weekdays.length === 0
                 ? '沒有選星期'
@@ -172,7 +194,7 @@ export default function App() {
             <View style={styles.row}>
               <Pressable
                 style={[styles.btn, { backgroundColor: '#2A9D8F' }]}
-                onPress={() => setShowing({ title: r.title, message: r.message })}
+                onPress={() => setShowing({ title: r.title, message: r.message, voiceUri: r.voiceUri })}
               >
                 <Text style={styles.btnText}>🔊 試聽</Text>
               </Pressable>
@@ -246,6 +268,7 @@ export default function App() {
 
       <ReminderOverlay
         visible={!!showing}
+        voiceUri={showing?.voiceUri}
         title={showing?.title ?? ''}
         message={showing?.message ?? ''}
         onClose={() => setShowing(null)}
@@ -269,6 +292,44 @@ function EditModal({
 }) {
   const [r, setR] = useState<Reminder>(value);
   const [showPicker, setShowPicker] = useState(false);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recState = useAudioRecorderState(recorder);
+  const preview = useAudioPlayer(null);
+
+  const startRec = async () => {
+    const perm = await requestRecordingPermissionsAsync();
+    if (!perm.granted) return Alert.alert('需要麥克風', '請允許使用麥克風，才能錄自己的聲音。');
+    try {
+      preview.pause();
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+    } catch (e) {
+      Alert.alert('無法錄音', String(e));
+    }
+  };
+
+  const stopRec = async (): Promise<string | undefined> => {
+    try {
+      await recorder.stop();
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+      const uri = recorder.uri;
+      if (!uri) return undefined;
+      const dest = new File(Paths.document, `voice-${r.id}-${Date.now()}.m4a`);
+      await new File(uri).copy(dest);
+      setR((cur) => ({ ...cur, voiceUri: dest.uri }));
+      return dest.uri;
+    } catch (e) {
+      Alert.alert('錄音失敗', String(e));
+    }
+  };
+
+  const playRec = () => {
+    if (!r.voiceUri) return;
+    preview.replace({ uri: r.voiceUri });
+    preview.seekTo(0).catch(() => {});
+    preview.play();
+  };
 
   const toggleDay = (d: number) =>
     setR({ ...r, weekdays: r.weekdays.includes(d) ? r.weekdays.filter((x) => x !== d) : [...r.weekdays, d] });
@@ -297,6 +358,30 @@ function EditModal({
           onChangeText={(t) => setR({ ...r, message: t })}
         />
 
+        <Text style={styles.label}>爸媽錄音（可以不錄）</Text>
+        <Text style={styles.hint}>
+          錄了之後，提醒時會播放你的聲音；沒錄的話，會用嘟嘟的聲音（內建的句子）或手機語音。
+        </Text>
+        {recState.isRecording ? (
+          <Pressable style={[styles.bigBtn, { backgroundColor: '#E63946' }]} onPress={() => stopRec()}>
+            <Text style={styles.bigBtnText}>⏹️ 停止錄音（{Math.floor((recState.durationMillis || 0) / 1000)} 秒）</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={[styles.bigBtn, { backgroundColor: '#8E44AD' }]} onPress={startRec}>
+            <Text style={styles.bigBtnText}>🎙️ {r.voiceUri ? '重新錄音' : '錄自己的聲音'}</Text>
+          </Pressable>
+        )}
+        {r.voiceUri && !recState.isRecording && (
+          <View style={styles.row}>
+            <Pressable style={[styles.btn, { backgroundColor: '#2A9D8F' }]} onPress={playRec}>
+              <Text style={styles.btnText}>▶️ 聽錄音</Text>
+            </Pressable>
+            <Pressable style={[styles.btn, { backgroundColor: '#999' }]} onPress={() => setR({ ...r, voiceUri: undefined })}>
+              <Text style={styles.btnText}>🗑️ 不用錄音</Text>
+            </Pressable>
+          </View>
+        )}
+
         <Text style={styles.label}>時間</Text>
         <Pressable style={[styles.bigBtn, { backgroundColor: '#457B9D' }]} onPress={() => setShowPicker(true)}>
           <Text style={[styles.bigBtnText, { fontSize: 40 }]}>🕒 {formatTime(r.hour, r.minute)}</Text>
@@ -318,9 +403,11 @@ function EditModal({
 
         <Pressable
           style={[styles.bigBtn, { backgroundColor: '#2A9D8F', marginTop: 24 }]}
-          onPress={() => {
+          onPress={async () => {
+            let voiceUri = r.voiceUri;
+            if (recState.isRecording) voiceUri = (await stopRec()) ?? voiceUri;
             if (!r.message.trim()) return Alert.alert('還沒寫要說的話喔');
-            onSave({ ...r, title: r.title.trim() || '提醒', message: r.message.trim() });
+            onSave({ ...r, voiceUri, title: r.title.trim() || '提醒', message: r.message.trim() });
           }}
         >
           <Text style={styles.bigBtnText}>💾 儲存</Text>
@@ -363,6 +450,8 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 24, fontWeight: '800', color: '#264653', marginTop: 4 },
   cardMsg: { fontSize: 24, color: '#333', marginVertical: 6 },
   days: { fontSize: 18, color: '#666', marginBottom: 12 },
+  voiceTag: { fontSize: 16, color: '#8E44AD', marginBottom: 2 },
+  hint: { fontSize: 16, color: '#666', marginBottom: 6 },
   btn: { flex: 1, paddingVertical: 16, borderRadius: 18, alignItems: 'center' },
   btnText: { fontSize: 24, fontWeight: '800', color: '#fff' },
   bigBtn: { paddingVertical: 20, borderRadius: 24, alignItems: 'center', marginVertical: 8 },

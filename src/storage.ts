@@ -9,6 +9,7 @@ export type Reminder = {
   minute: number; // 0–59
   weekdays: number[]; // 1=星期一 … 7=星期日
   enabled: boolean;
+  voiceUri?: string; // 家長自己錄的聲音（手機裡的檔案位置），沒有就用內建語音或文字轉語音
 };
 
 const KEY = 'kids-reminder/reminders/v1';
