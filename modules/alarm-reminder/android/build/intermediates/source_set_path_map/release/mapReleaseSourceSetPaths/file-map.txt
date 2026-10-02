@@ -1,0 +1,13 @@
+com.caroelvis.alarmreminder.alarm-reminder-annotation-experimental-1.4.0-0 /home/box/.gradle/caches/9.3.1/transforms/00a464931d6fb06fd97752313754b09b/transformed/annotation-experimental-1.4.0/res
+com.caroelvis.alarmreminder.alarm-reminder-profileinstaller-1.3.0-1 /home/box/.gradle/caches/9.3.1/transforms/04c1dcefa7e00fae4d134ab5a0249919/transformed/profileinstaller-1.3.0/res
+com.caroelvis.alarmreminder.alarm-reminder-core-1.13.1-2 /home/box/.gradle/caches/9.3.1/transforms/5323fcfe006806a5e42ef27805352e07/transformed/core-1.13.1/res
+com.caroelvis.alarmreminder.alarm-reminder-core-runtime-2.2.0-3 /home/box/.gradle/caches/9.3.1/transforms/9e9f691bc757ea3a086cd1ce43a55c48/transformed/core-runtime-2.2.0/res
+com.caroelvis.alarmreminder.alarm-reminder-lifecycle-runtime-2.6.2-4 /home/box/.gradle/caches/9.3.1/transforms/cff0b69a51ebdc003a015ce43dc067fb/transformed/lifecycle-runtime-2.6.2/res
+com.caroelvis.alarmreminder.alarm-reminder-startup-runtime-1.1.1-5 /home/box/.gradle/caches/9.3.1/transforms/ed766e5c56c8b4117ff44c11bd30df8d/transformed/startup-runtime-1.1.1/res
+com.caroelvis.alarmreminder.alarm-reminder-pngs-6 /workspace/kids-reminder/modules/alarm-reminder/android/build/generated/res/pngs/release
+com.caroelvis.alarmreminder.alarm-reminder-resValues-7 /workspace/kids-reminder/modules/alarm-reminder/android/build/generated/res/resValues/release
+com.caroelvis.alarmreminder.alarm-reminder-mergeReleaseResources-8 /workspace/kids-reminder/modules/alarm-reminder/android/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+com.caroelvis.alarmreminder.alarm-reminder-mergeReleaseResources-9 /workspace/kids-reminder/modules/alarm-reminder/android/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+com.caroelvis.alarmreminder.alarm-reminder-release-10 /workspace/kids-reminder/modules/alarm-reminder/android/build/intermediates/merged_res/release/mergeReleaseResources
+com.caroelvis.alarmreminder.alarm-reminder-main-11 /workspace/kids-reminder/modules/alarm-reminder/android/src/main/res
+com.caroelvis.alarmreminder.alarm-reminder-release-12 /workspace/kids-reminder/modules/alarm-reminder/android/src/release/res

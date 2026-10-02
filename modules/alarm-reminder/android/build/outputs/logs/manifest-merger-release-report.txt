@@ -1,0 +1,88 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:1:1-24:12
+INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:1:1-24:12
+	package
+		INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:1:11-69
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:2:3-75
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:2:20-72
+uses-permission#android.permission.USE_FULL_SCREEN_INTENT
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:3:3-79
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:3:20-76
+uses-permission#android.permission.USE_EXACT_ALARM
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:4:3-72
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:4:20-69
+uses-permission#android.permission.SCHEDULE_EXACT_ALARM
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:5:3-77
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:5:20-74
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:6:3-79
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:6:20-76
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:7:3-66
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:7:20-63
+uses-permission#android.permission.VIBRATE
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:8:3-64
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:8:20-61
+uses-permission#android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:9:3-93
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:9:20-90
+uses-permission#android.permission.SYSTEM_ALERT_WINDOW
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:10:3-76
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:10:20-73
+application
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:12:3-23:17
+receiver#com.caroelvis.alarmreminder.AlarmReceiver
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:13:5-99
+	android:exported
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:13:72-96
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:13:15-71
+receiver#com.caroelvis.alarmreminder.RescheduleReceiver
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:14:5-22:16
+	android:exported
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:14:77-100
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:14:15-76
+intent-filter#action:name:android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED+action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.MY_PACKAGE_REPLACED+action:name:android.intent.action.TIMEZONE_CHANGED+action:name:android.intent.action.TIME_SET
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:15:7-21:23
+action#android.intent.action.BOOT_COMPLETED
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:16:9-71
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:16:17-68
+action#android.intent.action.MY_PACKAGE_REPLACED
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:17:9-76
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:17:17-73
+action#android.intent.action.TIME_SET
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:18:9-65
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:18:17-62
+action#android.intent.action.TIMEZONE_CHANGED
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:19:9-73
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:19:17-70
+action#android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED
+ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:20:9-99
+	android:name
+		ADDED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml:20:17-96
+uses-sdk
+INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml
+INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /workspace/kids-reminder/modules/alarm-reminder/android/src/main/AndroidManifest.xml

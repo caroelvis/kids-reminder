@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.caroelvis.alarmreminder.alarm-reminder-release-9:/layout-v21/notification_action.xml",
+        "source": "com.caroelvis.alarmreminder.alarm-reminder-core-1.13.1-2:/layout-v21/notification_action.xml"
+    },
+    {
+        "merged": "com.caroelvis.alarmreminder.alarm-reminder-release-9:/layout-v21/notification_template_custom_big.xml",
+        "source": "com.caroelvis.alarmreminder.alarm-reminder-core-1.13.1-2:/layout-v21/notification_template_custom_big.xml"
+    },
+    {
+        "merged": "com.caroelvis.alarmreminder.alarm-reminder-release-9:/layout-v21/notification_action_tombstone.xml",
+        "source": "com.caroelvis.alarmreminder.alarm-reminder-core-1.13.1-2:/layout-v21/notification_action_tombstone.xml"
+    },
+    {
+        "merged": "com.caroelvis.alarmreminder.alarm-reminder-release-9:/layout-v21/notification_template_icon_group.xml",
+        "source": "com.caroelvis.alarmreminder.alarm-reminder-core-1.13.1-2:/layout-v21/notification_template_icon_group.xml"
+    }
+]

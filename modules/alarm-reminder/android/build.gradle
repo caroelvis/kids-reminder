@@ -1,0 +1,23 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.caroelvis.alarmreminder'
+version = '1.0.0'
+
+android {
+  namespace "com.caroelvis.alarmreminder"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+    consumerProguardFiles 'proguard-rules.pro'
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  implementation "androidx.core:core:1.13.1"
+}

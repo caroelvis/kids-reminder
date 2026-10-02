@@ -1,7 +1,7 @@
 // 全螢幕提醒畫面：嘟嘟 + 對話框 + 「我知道了！」按鈕
 // 有語音檔（內建或家長錄音）就播語音檔；沒有才用文字轉語音。
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import Mascot from './Mascot';
 import { speak, stopSpeaking } from './speech';
@@ -13,12 +13,13 @@ type Props = {
   message: string;
   voiceUri?: string;
   onClose: () => void;
+  onDismiss?: () => void; // 按了「我知道了！」（取消通知、離開鎖定畫面模式）
 };
 
 const MAX_PLAYS = 3; // 自動最多念 3 次
 const REPEAT_GAP_MS = 2000; // 念完後等 2 秒再念
 
-export default function ReminderOverlay({ visible, title, message, voiceUri, onClose }: Props) {
+export default function ReminderOverlay({ visible, title, message, voiceUri, onClose, onDismiss }: Props) {
   const [ttsSpeaking, setTtsSpeaking] = useState(false);
   const pop = useRef(new Animated.Value(0)).current;
   const player = useAudioPlayer(null, { updateInterval: 100 });
@@ -126,15 +127,29 @@ export default function ReminderOverlay({ visible, title, message, voiceUri, onC
   const close = () => {
     active.current = false;
     stopAll();
+    onDismiss?.();
     onClose();
   };
+
+  // Android 返回鍵 = 我知道了
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      close();
+      return true;
+    });
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   // 嘴巴跟著聲音動：語音檔正在播放，或文字轉語音正在念
   const speaking = (usingClip.current && clipActive.current && status.playing) || ttsSpeaking;
 
+  if (!visible) return null;
+
   return (
-    <Modal visible={visible} animationType="fade" statusBarTranslucent onRequestClose={close}>
-      <View style={styles.bg}>
+    // 不用 Modal：直接蓋在整個畫面上，這樣在鎖定畫面上也看得到
+    <View style={[StyleSheet.absoluteFill, styles.bg]}>
         <Text style={styles.title}>{title}</Text>
         <Animated.View style={[styles.bubble, { transform: [{ scale: pop }] }]}>
           <Text style={styles.message}>{message}</Text>
@@ -149,13 +164,12 @@ export default function ReminderOverlay({ visible, title, message, voiceUri, onC
         <Pressable onPress={again} style={styles.againBtn}>
           <Text style={styles.againText}>🔊 再聽一次</Text>
         </Pressable>
-      </View>
-    </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: '#BDE7FF', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  bg: { backgroundColor: '#BDE7FF', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 100, elevation: 100 },
   title: { fontSize: 30, fontWeight: '800', color: '#1D4E89', marginBottom: 16 },
   bubble: {
     backgroundColor: '#fff',

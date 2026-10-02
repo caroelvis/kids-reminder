@@ -27,6 +27,7 @@ import {
   saveReminders,
 } from './src/storage';
 import { ensurePermission, rescheduleAll, setupChannel } from './src/notifications';
+import AlarmReminder, { AlarmStatus, LaunchReminder, SettingsKind } from './modules/alarm-reminder';
 import ReminderOverlay from './src/ReminderOverlay';
 import { BUNDLED_CLIPS, initAudio } from './src/voice';
 import { warmUpSpeech } from './src/speech';
@@ -45,7 +46,7 @@ initAudio();
 
 const PACKAGE = 'com.caroelvis.kidsreminder';
 
-type Showing = { title: string; message: string; voiceUri?: string } | null;
+type Showing = { id?: string; title: string; message: string; voiceUri?: string } | null;
 
 export default function App() {
   const [list, setList] = useState<Reminder[] | null>(null);
@@ -69,18 +70,51 @@ export default function App() {
     });
   }, []);
 
+  const [status, setStatus] = useState<AlarmStatus | null>(null);
+  const refreshStatus = useCallback(() => {
+    try {
+      if (AlarmReminder) setStatus(AlarmReminder.getStatus());
+    } catch {}
+  }, []);
+
+  // 被「鬧鐘」打開（或 App 開著時鬧鐘響了）→ 直接顯示嘟嘟並開始念
+  const showFromAlarm = useCallback((l: LaunchReminder | null | undefined) => {
+    if (!l || !l.id) return;
+    const r = listRef.current?.find((x) => x.id === l.id);
+    setEditing(null);
+    setShowing({
+      id: l.id,
+      title: r?.title || l.title || '提醒',
+      message: r?.message || l.message || '',
+      voiceUri: r?.voiceUri,
+    });
+  }, []);
+
   // 第一次開啟：載入資料、建立通知頻道、要求權限、排程
   useEffect(() => {
     warmUpSpeech();
     (async () => {
+      const loaded = await loadReminders();
+      listRef.current = loaded;
+      setList(loaded);
+      if (AlarmReminder) showFromAlarm(AlarmReminder.consumeLaunchReminder());
       await setupChannel();
       const ok = await ensurePermission();
       setPermOk(ok);
-      const loaded = await loadReminders();
-      setList(loaded);
-      if (ok) await rescheduleAll(loaded);
+      await syncAlarms(loaded, ok);
+      refreshStatus();
     })();
-  }, []);
+  }, [showFromAlarm, refreshStatus]);
+
+  // App 開著時鬧鐘響了（或從背景被叫到前面）
+  useEffect(() => {
+    if (!AlarmReminder) return;
+    const sub = AlarmReminder.addListener('onReminderLaunch', (l) => {
+      AlarmReminder?.consumeLaunchReminder();
+      showFromAlarm(l);
+    });
+    return () => sub.remove();
+  }, [showFromAlarm]);
 
   // 通知到達（App 在前景）或使用者點了通知 → 顯示嘟嘟並念出來
   useEffect(() => {
@@ -97,6 +131,8 @@ export default function App() {
       if (s === 'active') {
         const p = await Notifications.getPermissionsAsync();
         setPermOk(p.granted);
+        refreshStatus();
+        if (AlarmReminder) showFromAlarm(AlarmReminder.consumeLaunchReminder());
       }
     });
     return () => {
@@ -104,36 +140,35 @@ export default function App() {
       tap.remove();
       sub.remove();
     };
-  }, [showFromNotification]);
+  }, [showFromNotification, refreshStatus, showFromAlarm]);
 
   const update = async (next: Reminder[]) => {
     setList(next);
     await saveReminders(next);
-    if (permOk) await rescheduleAll(next);
+    await syncAlarms(next, permOk);
   };
 
   const askPermission = async () => {
     const ok = await ensurePermission();
     setPermOk(ok);
-    if (ok && list) await rescheduleAll(list);
-    if (!ok && Platform.OS === 'android') {
-      IntentLauncher.startActivityAsync('android.settings.APP_NOTIFICATION_SETTINGS', {
-        extra: { 'android.provider.extra.APP_PACKAGE': PACKAGE },
-      }).catch(() => {});
-    }
+    if (ok && list) await syncAlarms(list, ok);
+    if (!ok) openSettings('notifications');
+    refreshStatus();
   };
 
-  const openExactAlarm = () =>
-    IntentLauncher.startActivityAsync('android.settings.REQUEST_SCHEDULE_EXACT_ALARM', {
+  const openSettings = (kind: SettingsKind) => {
+    if (AlarmReminder?.openSettings(kind)) return;
+    IntentLauncher.startActivityAsync('android.settings.APPLICATION_DETAILS_SETTINGS', {
       data: `package:${PACKAGE}`,
-    }).catch(() => Alert.alert('無法開啟', '請到「設定 → 應用程式 → 上學小提醒」手動開啟「鬧鐘與提醒」。'));
-
-  const openBattery = () =>
-    IntentLauncher.startActivityAsync('android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS').catch(() =>
-      Alert.alert('無法開啟', '請到「設定 → 電池」把「上學小提醒」設為「不限制 / 不最佳化」。')
-    );
+    }).catch(() => Alert.alert('無法開啟', '請到「設定 → 應用程式 → 上學小提醒」手動設定。'));
+  };
 
   const testNow = async () => {
+    if (AlarmReminder) {
+      AlarmReminder.scheduleTest(10, '測試提醒', '這是 10 秒後的測試通知喔！');
+      Alert.alert('好的！', '10 秒後嘟嘟會跳出來。現在可以先按電源鍵把手機鎖起來，看看會不會自己跳出來喔！');
+      return;
+    }
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '⏰ 測試提醒',
@@ -147,7 +182,7 @@ export default function App() {
         channelId: 'school-reminders',
       },
     });
-    Alert.alert('好的！', '10 秒後會跳出測試通知。可以先回到桌面試試看。');
+    Alert.alert('好的！', '10 秒後會跳出測試通知。');
   };
 
   if (!list) {
@@ -223,19 +258,31 @@ export default function App() {
         </Pressable>
 
         <Text style={styles.section}>給爸爸媽媽 👨‍👩‍👧</Text>
-        <Pressable style={styles.smallBtn} onPress={testNow}>
-          <Text style={styles.smallBtnText}>⏱️ 10 秒後測試通知</Text>
-        </Pressable>
-        {Platform.OS === 'android' && (
-          <>
-            <Pressable style={styles.smallBtn} onPress={openExactAlarm}>
-              <Text style={styles.smallBtnText}>⏰ 允許準時鬧鐘（鬧鐘與提醒）</Text>
+        {status && (
+          <View style={styles.checkCard}>
+            <Text style={styles.checkTitle}>要讓嘟嘟像鬧鐘一樣自己跳出來，請確認：</Text>
+            <CheckRow ok={status.notifications} label="通知" fix="開啟通知" onFix={askPermission} />
+            <CheckRow ok={status.exactAlarm} label="準時鬧鐘（鬧鐘與提醒）" fix="允許" onFix={() => openSettings('exactAlarm')} />
+            <CheckRow ok={status.fullScreen} label="全螢幕跳出" fix="允許全螢幕跳出" onFix={() => openSettings('fullScreen')} />
+            <CheckRow ok={status.battery} label="不受電池最佳化限制" fix="關閉電池最佳化" onFix={() => openSettings('battery')} />
+            <CheckRow
+              ok={status.overlay}
+              label="顯示在其他應用程式上層（建議，手機沒鎖時也能直接跳出）"
+              fix="允許"
+              onFix={() => openSettings('overlay')}
+            />
+            <Text style={styles.hint}>
+              小米、OPPO、vivo、realme 等手機還要在「應用程式詳細資料 → 其他權限」打開「後台彈出介面」、「鎖定畫面顯示」，
+              並允許「自啟動」。
+            </Text>
+            <Pressable style={styles.smallBtn} onPress={() => openSettings('app')}>
+              <Text style={styles.smallBtnText}>⚙️ 開啟 App 詳細設定</Text>
             </Pressable>
-            <Pressable style={styles.smallBtn} onPress={openBattery}>
-              <Text style={styles.smallBtnText}>🔋 關閉電池最佳化（避免通知延遲）</Text>
-            </Pressable>
-          </>
+          </View>
         )}
+        <Pressable style={styles.smallBtn} onPress={testNow}>
+          <Text style={styles.smallBtnText}>⏱️ 10 秒後測試（按完把手機鎖起來試試看）</Text>
+        </Pressable>
         <Pressable
           style={styles.smallBtn}
           onPress={() =>
@@ -268,6 +315,9 @@ export default function App() {
 
       <ReminderOverlay
         visible={!!showing}
+        onDismiss={() => {
+          if (showing?.id) AlarmReminder?.dismiss(showing.id);
+        }}
         voiceUri={showing?.voiceUri}
         title={showing?.title ?? ''}
         message={showing?.message ?? ''}
@@ -275,6 +325,43 @@ export default function App() {
       />
     </View>
   );
+}
+
+function CheckRow({ ok, label, fix, onFix }: { ok: boolean; label: string; fix: string; onFix: () => void }) {
+  return (
+    <View style={[styles.row, { marginVertical: 4 }]}>
+      <Text style={{ fontSize: 22 }}>{ok ? '✅' : '❌'}</Text>
+      <Text style={{ flex: 1, fontSize: 17, color: '#333' }}>{label}</Text>
+      {!ok && (
+        <Pressable style={styles.fixBtn} onPress={onFix}>
+          <Text style={styles.fixBtnText}>{fix}</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+/** 把提醒交給 Android 鬧鐘排程；沒有原生模組時（例如 Expo Go）改用一般通知 */
+async function syncAlarms(list: Reminder[], permOk: boolean) {
+  if (AlarmReminder) {
+    // 舊版（v1.0.x）用 expo-notifications 排的通知全部取消，避免重複響
+    await Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
+    AlarmReminder.setReminders(
+      JSON.stringify(
+        list.map(({ id, title, message, hour, minute, weekdays, enabled }) => ({
+          id,
+          title,
+          message,
+          hour,
+          minute,
+          weekdays,
+          enabled,
+        }))
+      )
+    );
+    return;
+  }
+  if (permOk) await rescheduleAll(list);
 }
 
 function EditModal({
@@ -452,6 +539,10 @@ const styles = StyleSheet.create({
   days: { fontSize: 18, color: '#666', marginBottom: 12 },
   voiceTag: { fontSize: 16, color: '#8E44AD', marginBottom: 2 },
   hint: { fontSize: 16, color: '#666', marginBottom: 6 },
+  checkCard: { backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 8, borderWidth: 2, borderColor: '#FFD84D' },
+  checkTitle: { fontSize: 18, fontWeight: '800', color: '#264653', marginBottom: 6 },
+  fixBtn: { backgroundColor: '#E76F51', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12 },
+  fixBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
   btn: { flex: 1, paddingVertical: 16, borderRadius: 18, alignItems: 'center' },
   btnText: { fontSize: 24, fontWeight: '800', color: '#fff' },
   bigBtn: { paddingVertical: 20, borderRadius: 24, alignItems: 'center', marginVertical: 8 },

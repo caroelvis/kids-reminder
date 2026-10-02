@@ -1,0 +1,6 @@
+[
+    {
+        "merged": "com.caroelvis.alarmreminder.alarm-reminder-release-9:/drawable-v21/notification_action_background.xml",
+        "source": "com.caroelvis.alarmreminder.alarm-reminder-core-1.13.1-2:/drawable-v21/notification_action_background.xml"
+    }
+]

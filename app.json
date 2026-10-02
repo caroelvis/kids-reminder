@@ -2,7 +2,7 @@
   "expo": {
     "name": "上學小提醒",
     "slug": "kids-reminder",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.caroelvis.kidsreminder",
-      "versionCode": 6,
+      "versionCode": 7,
       "adaptiveIcon": {
         "backgroundColor": "#FFE9A8",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -25,7 +25,10 @@
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
         "android.permission.WAKE_LOCK",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.USE_EXACT_ALARM",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
       ],
       "predictiveBackGestureEnabled": false
     },
